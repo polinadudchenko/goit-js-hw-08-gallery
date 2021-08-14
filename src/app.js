@@ -67,14 +67,17 @@ const galleryItems = [
 const refs = {
   parentGallery: document.querySelector(".js-gallery"),
   modalWindow: document.querySelector(".js-lightbox"),
+  modalOverlay: document.querySelector(".lightbox__overlay"),
   modalBtn: document.querySelector(".lightbox__button"),
   modalImg: document.querySelector('.lightbox__image'),
+
 }
 const parentGallery = document.querySelector(".js-gallery");
 
 createGallery(galleryItems, refs.parentGallery)
 refs.parentGallery.addEventListener('click', onOpenModal)
 refs.modalBtn.addEventListener('click', onCloseModal)
+refs.modalOverlay.addEventListener('click', onOverlayClose)
 
 function createGallery(imagesArray, parentElement) {
   const htmlString = imagesArray.reduce((acc, {preview, original, description}) => acc + `<li class="gallery__item"> <a class="gallery__link" href="${original}" > <img class="gallery__image" src="${preview}" data-source="${original}" alt="${description}"/></a></li>`, '');
@@ -86,6 +89,7 @@ function onOpenModal(e) {
   if (!e.target.classList.contains('gallery__image')) {
     return;
   }
+  window.addEventListener('keydown', onEscKeyPress)
   
   const imageUrl = e.target.dataset.source;
   const imageAlt = e.target.dataset.alt;
@@ -113,6 +117,20 @@ function deleteSrc() {
 }
 
 function onCloseModal() {
+  window.removeEventListener('keydown', onEscKeyPress)
   refs.modalWindow.classList.remove("is-open")
   deleteSrc();
+}
+
+function onOverlayClose(e) {
+  if (e.target === e.currentTarget) {
+    onCloseModal();
+  }
+}
+
+function onEscKeyPress(e) {
+  if (e.code === "Escape") {
+    onCloseModal();
+  }
+  
 }
