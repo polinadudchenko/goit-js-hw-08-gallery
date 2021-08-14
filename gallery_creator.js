@@ -8,15 +8,16 @@ const refs = {
   modalImg: document.querySelector('.lightbox__image'),
 
 }
+let { parentGallery, modalWindow, modalOverlay, modalBtn, modalImg } = refs;
+let currentIndex = 0;
+createGallery(galleryItems, parentGallery)
 
-createGallery(galleryItems, refs.parentGallery)
-
-refs.parentGallery.addEventListener('click', onOpenModal)
-refs.modalBtn.addEventListener('click', onCloseModal)
-refs.modalOverlay.addEventListener('click', onOverlayClose)
+parentGallery.addEventListener('click', onOpenModal)
+modalBtn.addEventListener('click', onCloseModal)
+modalOverlay.addEventListener('click', onOverlayClose)
 
 function createGallery(imagesArray, parentElement) {
-  const htmlString = imagesArray.reduce((acc, {preview, original, description}) => acc + `<li class="gallery__item"> <a class="gallery__link" href="${original}" > <img class="gallery__image" src="${preview}" data-source="${original}" alt="${description}"/></a></li>`, '');
+  const htmlString = imagesArray.reduce((acc, {preview, original, description}, index) => acc + `<li class="gallery__item"> <a class="gallery__link" href="${original}" > <img class="gallery__image" src="${preview}" data-source="${original}" data-index="${index}" alt="${description}"/></a></li>`, '');
   return parentElement.insertAdjacentHTML('afterbegin', htmlString)
 }
 
@@ -25,37 +26,43 @@ function onOpenModal(e) {
   if (!e.target.classList.contains('gallery__image')) {
     return;
   }
-  window.addEventListener('keydown', onEscKeyPress)
+  window.addEventListener('keydown', onKeyPress)
   
-  const imageUrl = e.target.dataset.source;
-  const imageAlt = e.target.dataset.alt;
-  const content = document.querySelector('.lightbox__image');
-  console.log(content);
-  content.src = imageUrl;
-  content.alt = imageAlt;
-  
-  refs.modalWindow.classList.add("is-open")
-}
-
-function getSrc(e) {
-  if (!e.target.classList.contains('gallery-image')) {
-    return;
-  }
-  const imageUrl = e.currentTarget.dataset.source;
-  console.log(imageUrl);
-  const content = document.querySelector('lightbox__image');
-  content.src = imageUrl;
-}
-
-function deleteSrc() {
-  refs.modalImg.src = '';
-  refs.modalImg.alt = '';
+  getSrcAndAlt(e);
+  const imageIdx = e.target.dataset.index;
+  currentIndex = imageIdx;
+  modalWindow.classList.add("is-open")
 }
 
 function onCloseModal() {
-  window.removeEventListener('keydown', onEscKeyPress)
-  refs.modalWindow.classList.remove("is-open")
-  deleteSrc();
+  window.removeEventListener('keydown', onKeyPress)
+  modalWindow.classList.remove("is-open")
+  setSrcAndAlt('', '');
+}
+
+function onKeyPress(e) {
+  if (e.code === "Escape") {
+    onCloseModal();
+  }
+  if (e.code === "ArrowRight") {
+    swipeRight();
+  }
+  if (e.code === "ArrowLeft") {
+    swipeLeft();
+  }
+}
+
+function getSrcAndAlt(e) {
+  const imageUrl = e.target.dataset.source;
+  const imageAlt = e.target.dataset.alt;
+  
+
+  setSrcAndAlt(imageUrl, imageAlt);
+}
+
+function setSrcAndAlt(url, alt) {
+  modalImg.src = url;
+  modalImg.alt = alt;
 }
 
 function onOverlayClose(e) {
@@ -64,9 +71,20 @@ function onOverlayClose(e) {
   }
 }
 
-function onEscKeyPress(e) {
-  if (e.code === "Escape") {
-    onCloseModal();
+function swipeRight() {
+  currentIndex += 1;
+  if (currentIndex > galleryItems.length - 1) {
+    currentIndex = 0;
   }
-  
+  modalImg.src = galleryItems[currentIndex].original;
+  modalImg.alt = galleryItems[currentIndex].description;
+}
+
+function swipeLeft() {
+  currentIndex -= 1;
+  if (currentIndex < 0) {
+    currentIndex = galleryItems.length - 1;
+  }
+  modalImg.src = galleryItems[currentIndex].original;
+  modalImg.alt = galleryItems[currentIndex].description;
 }
