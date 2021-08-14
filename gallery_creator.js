@@ -22,16 +22,16 @@ function createGallery(imagesArray, parentElement) {
 }
 
 function onOpenModal(e) {
+  window.addEventListener('keydown', onKeyPress)
+  currentIndex = Number(e.target.dataset.index);
+
   e.preventDefault()
   if (!e.target.classList.contains('gallery__image')) {
     return;
-  }
-  window.addEventListener('keydown', onKeyPress)
-  
+  } 
   getSrcAndAlt(e);
-  const imageIdx = e.target.dataset.index;
-  currentIndex = imageIdx;
   modalWindow.classList.add("is-open")
+  
 }
 
 function onCloseModal() {
@@ -41,20 +41,25 @@ function onCloseModal() {
 }
 
 function onKeyPress(e) {
-  if (e.code === "Escape") {
-    onCloseModal();
-  }
-  if (e.code === "ArrowRight") {
-    swipeRight();
-  }
-  if (e.code === "ArrowLeft") {
-    swipeLeft();
+  switch (e.code) {
+
+    case "Escape":
+      onCloseModal();
+      break;
+    
+    case "ArrowRight":
+      swipeRight();
+      break;
+    
+    case "ArrowLeft":
+      swipeLeft();
+      break;
   }
 }
 
 function getSrcAndAlt(e) {
-  const imageUrl = e.target.dataset.source;
-  const imageAlt = e.target.dataset.alt;
+  const imageUrl = e.target.src;
+  const imageAlt = e.target.alt;
   
 
   setSrcAndAlt(imageUrl, imageAlt);
@@ -76,6 +81,8 @@ function swipeRight() {
   if (currentIndex > galleryItems.length - 1) {
     currentIndex = 0;
   }
+  console.log(currentIndex);
+  console.log(galleryItems[currentIndex]);
   modalImg.src = galleryItems[currentIndex].original;
   modalImg.alt = galleryItems[currentIndex].description;
 }
