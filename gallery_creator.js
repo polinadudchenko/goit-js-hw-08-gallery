@@ -58,7 +58,7 @@ function onKeyPress(e) {
 }
 
 function getSrcAndAlt(e) {
-  const imageUrl = e.target.src;
+  const imageUrl = e.target.dataset.source;
   const imageAlt = e.target.alt;
   
 
